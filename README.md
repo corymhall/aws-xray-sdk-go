@@ -276,6 +276,25 @@ func HandleRequest(ctx context.Context, name string) (string, error) {
 }
 ```
 
+**AWS SDK Go V2**
+
+For usage with the [aws-sdk-go-v2](github.com/aws/aws-sdk-go-v2) add the xray middleware
+
+```go
+func Handler(ctx context.Context, event MyEvent) error {
+    cfg, err := config.LoadDefaultConfig()
+    if err != nil {
+        return err
+    }
+
+    client := dynamodb.NewFromConfig(cfg, func(options *dynamodb.Options) {
+            options.APIOptions = append(options.APIOptions, xray.AddXRayMiddleware())
+    })
+    return nil
+}
+```
+
+
 ## License
 
 The AWS X-Ray SDK for Go is licensed under the Apache 2.0 License. See LICENSE and NOTICE.txt for more information.
