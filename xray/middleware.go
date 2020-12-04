@@ -52,7 +52,6 @@ import (
 	"strings"
 
 	awsmiddleware "github.com/aws/aws-sdk-go-v2/aws/middleware"
-	"github.com/aws/aws-sdk-go-v2/aws/retry"
 	"github.com/aws/aws-xray-sdk-go/internal/logger"
 	"github.com/awslabs/smithy-go/middleware"
 	smithyhttp "github.com/awslabs/smithy-go/transport/http"
@@ -333,13 +332,13 @@ func addMiddleware(filename string) func(*middleware.Stack) error {
 		if err := stack.Finalize.Add(&BeforeFinalizeMiddleware{}, middleware.Before); err != nil {
 			return err
 		}
-		if err := stack.Finalize.Insert(&BeforeRetryMiddleware{}, retry.AttemptMiddleware{}.ID(), middleware.Before); err != nil {
+		if err := stack.Finalize.Insert(&BeforeRetryMiddleware{}, "Retry", middleware.Before); err != nil {
 			return err
 		}
-		if err := stack.Finalize.Insert(&AfterRetryMiddleware{}, retry.AttemptMiddleware{}.ID(), middleware.After); err != nil {
+		if err := stack.Finalize.Insert(&AfterRetryMiddleware{}, "Retry", middleware.After); err != nil {
 			return err
 		}
-		if err := stack.Deserialize.Insert(&CompleteMiddleware{whitelistFilename: filename}, "AWSRequestIDRetrieverMiddleware", middleware.Before); err != nil { // will be RequestIDRetriever
+		if err := stack.Deserialize.Insert(&CompleteMiddleware{whitelistFilename: filename}, "RequestIDRetriever", middleware.Before); err != nil { // will be RequestIDRetriever
 			return err
 		}
 		if err := stack.Deserialize.Insert(&AfterDeserializeMiddleware{}, "OperationDeserializer", middleware.Before); err != nil {
